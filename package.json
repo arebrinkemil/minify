@@ -1,6 +1,5 @@
 {
   "name": "minify",
-  "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node-esm -r dotenv/config ./lib/seed.ts dotenv_config_path=./.env.development.local"
+    "seed": "npx tsc ./lib/seed.ts --outDir ./build --esModuleInterop && node -r dotenv/config ./build/seed.js dotenv_config_path=./.env.development.local"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.4.0",
@@ -28,7 +27,6 @@
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
-
   },
   "devDependencies": {
     "@types/node": "^20",
