@@ -31,8 +31,8 @@ const seedUrls = async (client: VercelClient) => {
             user_id UUID NOT NULL REFERENCES users(id),
             original_url TEXT NOT NULL,
             short_url TEXT NOT NULL PRIMARY KEY,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            expires_at TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP,
             views INT DEFAULT 0
         );
         `;
