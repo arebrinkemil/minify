@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { Button } from "../ui/button";
-import Logout from "./Logout";
 import Image from 'next/image';
 import Link from 'next/link';
+import Logout from "./Logout";
 
 
 const Navbar = async () => {
