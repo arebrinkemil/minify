@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from "@vercel/postgres";
+import { generateShortUrl } from '@/lib/urlUtils';
+
 
 export async function POST(req: NextRequest) {
   const client = createClient();
@@ -7,7 +9,9 @@ export async function POST(req: NextRequest) {
   try {
     await client.connect();
     
-    const { original_url, short_url, expires_at } = await req.json();
+    const short_url = generateShortUrl();
+    
+    const { original_url, expires_at } = await req.json();
 
     const query = `
       INSERT INTO urls (original_url, short_url, expires_at)
