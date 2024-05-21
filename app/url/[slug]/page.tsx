@@ -28,7 +28,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       
   
 
-  return <div>Redirecting...</div>;
+  return <div>Redirecting...<p>test</p></div>;
 }
 
 
