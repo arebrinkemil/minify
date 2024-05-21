@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "npx tsc ./lib/seed.ts --outDir ./build --esModuleInterop && node -r dotenv/config ./build/seed.js dotenv_config_path=./.env.development.local"
+    "seed": "npx tsc ./lib/seed.ts --outDir ./dist --esModuleInterop && node -r dotenv/config ./dist/seed.js dotenv_config_path=./.env.development.local"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.4.0",
