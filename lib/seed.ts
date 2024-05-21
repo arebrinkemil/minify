@@ -28,7 +28,7 @@ const seedUrls = async (client: VercelClient) => {
         // Create the "urls" table if it doesn't exist
         const createTable = await client.sql`
         CREATE TABLE IF NOT EXISTS urls (
-            user_id UUID NOT NULL REFERENCES users(id),
+            user_id UUID REFERENCES users(id),
             original_url TEXT NOT NULL,
             short_url TEXT NOT NULL PRIMARY KEY,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
