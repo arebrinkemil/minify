@@ -23,6 +23,7 @@ export async function GET(
 
     const original_url = result.rows[0].original_url;
     return NextResponse.json({ success: true, data: { original_url } });
+    
 
   } catch (error) {
     console.error('Error fetching URL:', error);

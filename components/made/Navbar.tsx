@@ -9,7 +9,7 @@ const Navbar = async () => {
     const session = await getServerSession();
 
     return (
-        <div className="bg-zinc-100 py-2 border-b border-s-zinc-200 fixed w-full z-10 top-0 flex flex-row justify-between">
+        <div className="bg-zinc-100 py-1 border-b border-s-zinc-200 fixed w-full z-10 top-0 flex flex-row justify-between">
             <Link href="/">
                 <Image src="/minify.png" alt='Minify' width={70} height={70}></Image>
             </Link>
