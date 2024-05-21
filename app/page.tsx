@@ -81,7 +81,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="text-center" style={{paddingTop: '120px', paddingBottom: '120px'}}>
+    <div className="text-center" style={{paddingTop: "120px", paddingBottom: "120px"}}>
       <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0" >
         Minify
       </h2>
@@ -173,7 +173,7 @@ const HomePage = () => {
       <Accordion type="single" collapsible className="pt-8">
         <AccordionItem value="item-1">
           <AccordionTrigger>What happens to my link</AccordionTrigger>
-          <AccordionContent style={{ maxWidth: '320px' }}>
+          <AccordionContent style={{ maxWidth: "320px" }}>
             All links are stored in our Database and then removed when their timer runs out.
           </AccordionContent>
         </AccordionItem>
@@ -185,13 +185,13 @@ const HomePage = () => {
         </AccordionItem>
         <AccordionItem value="item-3">
           <AccordionTrigger>Will anyone else have access to my link?</AccordionTrigger>
-          <AccordionContent style={{ maxWidth: '320px' }}>
+          <AccordionContent style={{ maxWidth: "320px" }}>
             No your link is secure with us and will not be accessible for other users.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-4">
-          <AccordionTrigger>What does "max amount of clicks mean"?</AccordionTrigger>
-          <AccordionContent style={{ maxWidth: '320px' }}>
+          <AccordionTrigger>What does max amount of clicks mean?</AccordionTrigger>
+          <AccordionContent style={{ maxWidth: "320px" }}>
             If your max amount of clicks is 5, after the link has been clicked 5 times it will expire.
           </AccordionContent>
         </AccordionItem>
