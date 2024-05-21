@@ -6,14 +6,16 @@ type RegisterProps = {}
 
 const Register: FC<RegisterProps> = ({}) => {
   return (
-    <Card className='w-screen max-w-[450px]'>
-      <CardHeader>
-        <CardTitle>Register</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <RegisterForm />
-      </CardContent>
-    </Card>
+    <main className='h-screen flex justify-center items-center'>
+      <Card className='w-screen max-w-[450px] mb-20'>
+        <CardHeader>
+          <CardTitle>Register</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RegisterForm />
+        </CardContent>
+      </Card>
+    </main>
   )
 }
 
