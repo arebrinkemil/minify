@@ -1,6 +1,5 @@
 {
   "name": "minify",
-  "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,13 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node-esm -r dotenv/config ./lib/seed.ts dotenv_config_path=./.env.development.local"
+    "seed": "npx tsc ./lib/seed.ts --outDir ./dist --esModuleInterop && node -r dotenv/config ./dist/seed.js dotenv_config_path=./.env.development.local"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.4.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-navigation-menu": "^1.1.4",
+    "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@vercel/postgres": "^0.8.0",
     "bcrypt": "^5.1.1",
