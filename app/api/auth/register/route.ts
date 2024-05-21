@@ -3,6 +3,10 @@ import { z } from "zod";
 import { sql } from "@vercel/postgres";
 import bcrypt from "bcrypt";
 
+type ExtendedErrorType = Error & {
+    code?: string | number;
+}
+
 const userSchema = z.object({
     name: z.string().min(2, "Name must be 2 characters long.").max(250, "Name can't be more then 250 characters long."),
     email: z.string().email("Please provide a valid email address"),
@@ -31,9 +35,19 @@ export const POST = async (req: Request) => {
         if (error instanceof Error) {
             console.error(error)
             
-            return NextResponse.json({ error })
+            if ((error as ExtendedErrorType).code === "23505")  {
+                return NextResponse.json(
+                    { error: {
+                        ...error, 
+                        message: "This account already exists"
+                        } 
+                    }, 
+                    { 
+                        status: 409
+                    })
+            }
+            
         }
-
-        return NextResponse.error();
+        return NextResponse.json({ error }, { status: 500})
     }
 }
