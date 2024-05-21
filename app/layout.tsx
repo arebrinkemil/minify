@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from '../components/made/Navbar'
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,8 +22,9 @@ export default function RootLayout({
         <main className=" flex flex-col justify-center items-center">
           <Navbar/>
           {children}
-          </main>
-        </body>
+        </main>
+        <Toaster />
+      </body>
     </html>
   );
 }
