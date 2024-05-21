@@ -1,12 +1,20 @@
-
+import Image from 'next/image';
+import Link from 'next/link';
 
 
 const Navbar = () => {
 
 
     return (
-        <div className="bg-zinc-100 py-2 border-b border-s-zinc-200 fixed w-full z-10 ">
-            <div>login</div>
+        <div className="bg-zinc-100 py-2 border-b border-s-zinc-200 fixed w-full z-10 top-0 flex flex-row justify-between">
+            <Link href="/">
+                <Image src="/minify.png" alt='Minify' width={70} height={70}></Image>
+            </Link>
+                <div className='flex flex-row gap-6 pt-5 mr-5'>
+                    <Link href="/login"><div>Login</div></Link>
+                    <Link href="/register"><div>Register</div></Link>
+                </div>
+
 
         </div>
     )
