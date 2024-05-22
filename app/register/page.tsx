@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import RegisterForm from './form'
+import RegisterForm from '../../components/made/RegisterForm'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 type RegisterProps = {}

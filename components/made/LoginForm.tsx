@@ -1,51 +1,134 @@
-"use client"
+'use client'
 
-import { ChangeEvent, FC, FormEvent, FormHTMLAttributes, useState } from 'react';
-import { signIn } from "next-auth/react";
-import { useRouter } from 'next/navigation';
-import { Button } from "../ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage  } from '../ui/form';
-import { Input } from '../ui/input';
+import { FC } from 'react'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
-type LoginFormProps = FormHTMLAttributes<HTMLFormElement> & {};
+type FormProps = {}
 
-const LoginForm: FC<LoginFormProps> = ({ ...props }) => {
-    const [form, setForm] = useState({ email: "", password: ""})
-    const router = useRouter()
+const formSchema = z.object({
+  email: z.string().email({ message: 'Pleas provide a valid email' }),
+  password: z
+    .string()
+    .min(8, { message: 'Password must be at least 8 characters long' }),
+})
 
-    const handleChange = <T extends keyof typeof form>(prop: T, ev: ChangeEvent<HTMLInputElement>) => {
-        const { value } = ev.target
-        
-        setForm(prev => ({ ...prev, [prop]: value }))
-    }
+const LoginForm: FC<FormProps> = ({}) => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+  const router = useRouter()
 
-    const handleSubmit = async (ev: FormEvent) => {
-        ev.preventDefault();
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const submitPromise = new Promise(async (resolve, reject) => {
+        try {
+          const credentials = {
+            email: values.email,
+            password: values.password
+          }
 
-        const res = await signIn("credentials", { ...form, redirect: false });
+          const resSignIn = await signIn("credentials", { ...credentials, redirect: false });
 
-        if (!res?.error) {
+          
+          if (resSignIn?.error) {
+            if (resSignIn.error === "CredentialsSignin") {
+             const newError: Error = {
+                name: "CredentialsSignin",
+                message: "Invalid credentials"
+              }
+
+              reject(newError)
+              return;
+            }
+
+            reject(resSignIn.error)
+            return
+          }
+
+
+          resolve(true);
           router.push("/");
           router.refresh();
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            reject(error)
+          }
         }
-    }
-    
+    })
+
+    toast.promise(submitPromise, {
+        loading: `Signing in ${values.email}`,
+        success: "Login successful",
+        error: (error: Error) => error.message || "Failed signin, please try again"
+    })
+  }
+
   return (
-    <div className="text-center mb-8">
-    <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-      Minify
-    </h2>
-    <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-      Login
-    </h4>
-
-    <form {...props} className='text-black pt-16' onSubmit={handleSubmit}>
-      <Input placeholder='Email' value={form.email} onChange={(ev) => handleChange("email", ev)} type="text" name='email' autoComplete='email' autoFocus className='mb-5'/>
-      <Input placeholder='Password' value={form.password} onChange={(ev) => handleChange("password", ev)} type="password" name='password' autoComplete='current-password' className='mb-8'/>
-      <Button type='submit' style={{width: '200px'}}>Login</Button>
-    </form>
-  </div>
+    <Form {...form}>
+      <form
+        className='flex flex-col gap-2'
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        <FormField
+          control={form.control}
+          name='email'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input tabIndex={2} autoFocus autoComplete='email' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='password'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  tabIndex={3}
+                  type='password'
+                  autoComplete='current-password'
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button
+          disabled={!form.formState.isValid}
+          tabIndex={4}
+          className='mt-4 w-full'
+          type='submit'
+        >
+          Login
+        </Button>
+      </form>
+    </Form>
   )
-};
+}
 
-export default LoginForm;
+export default LoginForm
