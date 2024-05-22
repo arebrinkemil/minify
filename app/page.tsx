@@ -59,7 +59,8 @@ const HomePage = () => {
         },
         body: JSON.stringify({
           original_url: data.link,
-          expires_at: calculateExpiryDate(data.duration)
+          expires_at: calculateExpiryDate(data.duration),
+          max_views: parseInt(data.clickAmount)
         })
       });
 
@@ -132,7 +133,7 @@ const HomePage = () => {
           />
           <FormField
             control={form.control}
-            name="duration"
+            name="clickAmount"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -150,7 +151,7 @@ const HomePage = () => {
                           <SelectItem value="100">100 clicks</SelectItem>
                           <SelectItem value="1000">1000 clicks</SelectItem>
                           <SelectItem value="10000">10 000 clicks</SelectItem>
-                          <SelectItem value="9999999999">Unlimited amount of clicks</SelectItem>
+                          <SelectItem value="99999999">Unlimited amount of clicks</SelectItem>
                         </SelectContent>
                       </Select>
                     )}

@@ -33,7 +33,8 @@ const seedUrls = async (client: VercelClient) => {
             short_url TEXT NOT NULL PRIMARY KEY,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             expires_at TIMESTAMP,
-            views INT DEFAULT 0
+            views INT DEFAULT 0,
+            max_views INT
         );
         `;
         console.log(`Created "urls" table`);
