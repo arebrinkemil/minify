@@ -15,6 +15,9 @@ export async function GET(
     const query = 'SELECT original_url, views, max_views FROM urls WHERE short_url = $1;';
     const values = [slug];
 
+    const updateQuery = 'UPDATE urls SET views = views + 1 WHERE short_url = $1';
+    await client.query(updateQuery, values);
+
     const result = await client.query(query, values);
 
     if (result.rows.length === 0) {
@@ -26,10 +29,6 @@ export async function GET(
     if (views >= max_views) {
       return NextResponse.json({ success:false, error: 'URL has reached maximun amount of visists.'}, {status: 403})
     }
-
-    const updateQuery = 'UPDATE urls SET views = views + 1 WHERE short_url = $1';
-    await client.query(updateQuery, values);
-
 
     return NextResponse.json({ success: true, data: { original_url } });
     
