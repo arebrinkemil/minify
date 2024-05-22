@@ -1,17 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@vercel/postgres'
+import { generateShortUrl } from '@/lib/urlUtils'
+import { getToken } from 'next-auth/jwt'
 
 export async function GET(req: NextRequest) {
   const client = createClient()
 
   try {
-    const body = await req.json()
-    const userId = body.user_id
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    const userId = token?.sub
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 },
+      )
+    }
 
     await client.connect()
 
-    const query =
-      'SELECT original_url, short_url, created_at, expires_at, views, max_views FROM urls WHERE user_id = $1;'
+    const query = `
+      SELECT original_url, short_url, created_at, expires_at, views, max_views 
+      FROM urls 
+      WHERE user_id = $1;
+    `
     const values = [userId]
 
     const result = await client.query(query, values)
