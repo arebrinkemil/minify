@@ -7,6 +7,10 @@ const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt"
     },
+    pages: {
+        signIn: "/login",
+        signOut: "/logout"
+    },
     providers: [
         CredentialsProvider({
             name: "Credentials",

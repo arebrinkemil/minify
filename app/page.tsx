@@ -82,7 +82,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="text-center" style={{paddingTop: "120px", paddingBottom: "120px"}}>
+    <main className="text-center py-[120px] flex flex-col max-w-[500px] mx-auto">
       <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0" >
         Minify
       </h2>
@@ -137,7 +137,7 @@ const HomePage = () => {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                 <Controller
+                <Controller
                     name="clickAmount"
                     control={form.control}
                     render={({ field }) => (
@@ -197,7 +197,7 @@ const HomePage = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </div>
+    </main>
   );
 };
 

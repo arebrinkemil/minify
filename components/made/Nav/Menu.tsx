@@ -25,11 +25,20 @@ const Menu: FC<MenuProps> = ({ session }) => {
         </NavigationMenuList>
         <NavigationMenuList>
             {!!session ? (
-                <NavigationMenuItem asChild>
-                    <Button onClick={() => signOut()}>
-                        Sign out
-                    </Button>
-                </NavigationMenuItem>
+                <>
+                    <NavigationMenuItem>
+                        <Button asChild>
+                            <Link href={"/dashboard"}>
+                                Dashboard
+                            </Link>
+                        </Button>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem asChild>
+                        <Button onClick={() => signOut()}>
+                            Sign out
+                        </Button>
+                    </NavigationMenuItem>
+                </>
             ) : (
                 <>
                     <NavigationMenuItem>

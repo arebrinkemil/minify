@@ -43,4 +43,4 @@ export default withAuth(
   },
 )
 
-export const config = { matcher: '/api/user/:path*' }
+export const config = { matcher: ['/api/user/:path*', "/dashboard"] }
