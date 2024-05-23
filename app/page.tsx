@@ -25,6 +25,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useSession } from "next-auth/react";
 
 const FormSchema = z.object({
   link: z.string().min(2, {
@@ -49,6 +50,7 @@ const HomePage = () => {
   });
 
   const [shortUrl, setShortUrl] = React.useState<string | null>(null);
+  const session = useSession();
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
@@ -60,7 +62,8 @@ const HomePage = () => {
         body: JSON.stringify({
           original_url: data.link,
           expires_at: calculateExpiryDate(data.duration),
-          max_views: parseInt(data.clickAmount)
+          max_views: parseInt(data.clickAmount),
+          user_id: session.data?.user.id
         })
       });
 

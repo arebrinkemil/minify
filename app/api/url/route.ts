@@ -11,14 +11,14 @@ export async function POST(req: NextRequest) {
     
     const short_url = generateShortUrl();
     
-    const { original_url, expires_at, max_views } = await req.json();
+    const { original_url, expires_at, max_views, user_id } = await req.json();
 
     const query = `
-      INSERT INTO urls (original_url, short_url, expires_at, max_views)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO urls (original_url, short_url, expires_at, max_views, user_id)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
-    const values = [original_url, short_url, expires_at, max_views];
+    const values = [original_url, short_url, expires_at, max_views, user_id];
 
     const result = await client.query(query, values);
 

@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { getServerSession } from "next-auth";
 import LoginForm from '@/components/made/LoginForm';
 import { redirect } from 'next/navigation';
-import authOptions from '../api/auth/[...nextauth]/auth';
+import authOptions from '@/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 type LoginProps = {};

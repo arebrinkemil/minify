@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import authOptions from "@/app/api/auth/[...nextauth]/auth";
+import authOptions from "@/auth";
 import Menu from "./Menu";
 
 
