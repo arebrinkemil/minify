@@ -117,22 +117,41 @@ export async function PATCH(
 
     await client.connect()
 
-    console.log('Updating URL:', shortUrl, 'for user:', userId)
+    const fetchQuery =
+      'SELECT expires_at, max_views FROM urls WHERE user_id = $1 AND short_url = $2;'
+    const fetchValues = [userId, shortUrl]
 
-    const query =
-      'UPDATE urls SET expires_at = $1, max_views = $2 WHERE user_id = $3 AND short_url = $4 RETURNING *;'
-    const values = [body.expires_at, body.max_views, userId, shortUrl]
+    const fetchResult = await client.query(fetchQuery, fetchValues)
 
-    const result = await client.query(query, values)
-
-    if (result.rows.length === 0) {
+    if (fetchResult.rows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No URL found for this user' },
         { status: 404 },
       )
     }
 
-    return NextResponse.json({ success: true, data: { url: result.rows[0] } })
+    const existingUrl = fetchResult.rows[0]
+
+    const expiresAt = body.expires_at ?? existingUrl.expires_at
+    const maxViews = body.max_views ?? existingUrl.max_views
+
+    const updateQuery =
+      'UPDATE urls SET expires_at = $1, max_views = $2 WHERE user_id = $3 AND short_url = $4 RETURNING *;'
+    const updateValues = [expiresAt, maxViews, userId, shortUrl]
+
+    const updateResult = await client.query(updateQuery, updateValues)
+
+    if (updateResult.rows.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'No URL found for this user' },
+        { status: 404 },
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: { url: updateResult.rows[0] },
+    })
   } catch (error) {
     console.error('Error updating URL:', error)
     let errorMessage = 'An error occurred'
