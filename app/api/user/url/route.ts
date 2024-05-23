@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
     const userId = token?.sub
 
     if (!userId) {
+      console.log("failed !userId")
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 },
@@ -64,6 +65,7 @@ export async function GET(req: NextRequest) {
     const result = await client.query(query, values)
 
     if (result.rows.length === 0) {
+      console.log("Failed result.rows.length === 0")
       return NextResponse.json(
         { success: false, error: 'No URLs found for this user' },
         { status: 404 },
@@ -78,6 +80,9 @@ export async function GET(req: NextRequest) {
     if (error instanceof Error) {
       errorMessage = error.message
     }
+
+    console.log("failed catch")
+    
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 },
