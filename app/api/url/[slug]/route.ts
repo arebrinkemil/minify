@@ -26,7 +26,7 @@ export async function GET(
 
     const { original_url, views, max_views } = result.rows[0];
 
-    if (views >= max_views) {
+    if (max_views && views >= max_views) {
       return NextResponse.json({ success:false, error: 'URL has reached maximun amount of visists.'}, {status: 403})
     }
 

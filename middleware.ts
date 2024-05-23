@@ -38,9 +38,9 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token }) => !!token
     },
   },
 )
 
-export const config = { matcher: '/api/user/:path*' }
+export const config = { matcher: ['/api/user/:path*', "/dashboard"] }

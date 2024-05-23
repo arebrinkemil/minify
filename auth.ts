@@ -7,6 +7,10 @@ const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt"
     },
+    pages: {
+        signIn: "/login",
+        signOut: "/logout"
+    },
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -37,14 +41,13 @@ const authOptions: NextAuthOptions = {
           })
     ],
     callbacks: {
-        async session(sessionParams) {
-            const { session, token } = sessionParams
-
+        async session({ session, token }) {
             session.user = { ...session.user, id: token.sub || ""}
 
             return session;
         }
-    }
+    },
+    secret: process.env.NEXTAUTH_SECRET
 }
 
 export default authOptions

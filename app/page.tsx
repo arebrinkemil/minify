@@ -25,6 +25,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useSession } from "next-auth/react";
 
 const FormSchema = z.object({
   link: z.string().min(2, {
@@ -49,6 +50,7 @@ const HomePage = () => {
   });
 
   const [shortUrl, setShortUrl] = React.useState<string | null>(null);
+  const session = useSession();
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
@@ -60,7 +62,8 @@ const HomePage = () => {
         body: JSON.stringify({
           original_url: data.link,
           expires_at: calculateExpiryDate(data.duration),
-          max_views: parseInt(data.clickAmount)
+          max_views: parseInt(data.clickAmount),
+          user_id: session.data?.user.id
         })
       });
 
@@ -82,7 +85,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="text-center" style={{paddingTop: "120px", paddingBottom: "120px"}}>
+    <main className="text-center py-[120px] flex flex-col max-w-[500px] mx-auto">
       <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0" >
         Minify
       </h2>
@@ -137,7 +140,7 @@ const HomePage = () => {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                 <Controller
+                <Controller
                     name="clickAmount"
                     control={form.control}
                     render={({ field }) => (
@@ -197,7 +200,7 @@ const HomePage = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </div>
+    </main>
   );
 };
 

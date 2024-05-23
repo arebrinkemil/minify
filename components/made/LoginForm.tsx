@@ -15,7 +15,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 
 type FormProps = {}
@@ -36,6 +36,8 @@ const LoginForm: FC<FormProps> = ({}) => {
     },
   })
   const router = useRouter()
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const submitPromise = new Promise(async (resolve, reject) => {
@@ -65,7 +67,7 @@ const LoginForm: FC<FormProps> = ({}) => {
 
 
           resolve(true);
-          router.push("/");
+          router.push(callbackUrl || "/");
           router.refresh();
         } catch (error: unknown) {
           if (error instanceof Error) {
