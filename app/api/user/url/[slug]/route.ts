@@ -132,12 +132,13 @@ export async function PATCH(
 
     const existingUrl = fetchResult.rows[0]
 
+    const newShortUrl = body.short_url ?? existingUrl.short_url
     const expiresAt = body.expires_at ?? existingUrl.expires_at
     const maxViews = body.max_views ?? existingUrl.max_views
 
     const updateQuery =
-      'UPDATE urls SET expires_at = $1, max_views = $2 WHERE user_id = $3 AND short_url = $4 RETURNING *;'
-    const updateValues = [expiresAt, maxViews, userId, shortUrl]
+      'UPDATE urls SET expires_at = $1, max_views = $2, short_url = $3 WHERE user_id = $4 AND short_url = $5 RETURNING *;'
+    const updateValues = [expiresAt, maxViews, newShortUrl, userId, shortUrl]
 
     const updateResult = await client.query(updateQuery, updateValues)
 
