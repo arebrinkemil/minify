@@ -13,6 +13,11 @@ export type UrlType = {
   full_short: string
 }
 
+export const metadata = {
+  title: 'Minify - Dashbord',
+  description: 'User can edit there minified urls',
+}
+
 const Dashboard: FC<DashboardProps> = async () => {
   let urls: UrlType[] = []
 

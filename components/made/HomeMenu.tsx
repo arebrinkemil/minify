@@ -1,29 +1,20 @@
-// components/HomeMenu.tsx
 'use client'
-import React from 'react'
 
-import HomeForm from './HomeForm'
+import { useState } from 'react'
 import HomeAccordion from './HomeAccordion'
-
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import UrlForm from './UrlForm'
 
 const HomeMenu = () => {
-  const [shortUrl, setShortUrl] = React.useState<string | null>(null)
-
-  const handleShortUrlGenerated = (url: string) => {
-    setShortUrl(url)
-  }
-
-  const domain = process.env.NEXT_PUBLIC_BASE_URL
-  const fullLink = `${domain}/url/${shortUrl}`
+  const [url, setUrl] = useState('')
 
   const copyLink = () => {
-    navigator.clipboard.writeText(fullLink)
+    navigator.clipboard.writeText(url)
   }
 
   return (
@@ -34,29 +25,24 @@ const HomeMenu = () => {
       <h4 className='scroll-m-20 text-xl font-semibold tracking-tight'>
         URL Shortener
       </h4>
-
-      <HomeForm onShortUrlGenerated={handleShortUrlGenerated} />
-
-      {shortUrl && (
-        <div onClick={copyLink} className=''>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <h4 className='mt-4 scroll-m-20 text-xl font-semibold tracking-tight'>
-                  Shortened URL:
-                </h4>
-                <h4 className='scroll-m-20 text-xl font-semibold tracking-tight hover:scale-105'>
-                  {fullLink}
-                </h4>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Copy to clipboard</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+      <UrlForm setValue={setUrl} />
+      {url.length > 0 && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger onClick={copyLink}>
+              <h4 className='mt-4 scroll-m-20 text-xl font-semibold tracking-tight'>
+                Shortened URL:
+              </h4>
+              <h4 className='scroll-m-20 text-xl font-semibold tracking-tight hover:scale-105'>
+                {url}
+              </h4>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Copy to clipboard</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
-
       <HomeAccordion />
     </main>
   )
