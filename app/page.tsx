@@ -2,9 +2,9 @@ import HomeMenu from '@/components/made/HomeMenu'
 
 const Home = () => {
   return (
-    <div>
+    <main>
       <HomeMenu />
-    </div>
+    </main>
   )
 }
 
