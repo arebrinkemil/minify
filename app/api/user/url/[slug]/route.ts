@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@vercel/postgres'
+import { createClient, sql } from '@vercel/postgres'
+import { z } from 'zod'
+import { DBUrlRow } from '@/types/types'
 
-type Url = {
-  original_url: string
-  short_url: string
-  created_at: Date
-  expires_at: Date | null
-  views: number
-  max_views: number | null
-}
-
-type ApiResponse<T> = {
-  success: boolean
-  data?: T
-  error?: string
-}
+type ApiResponse<T> =
+  | {
+      success: true
+      data: T
+    }
+  | {
+      success: false
+      error: Error
+    }
 
 export async function GET(
   req: NextRequest,
@@ -33,22 +30,27 @@ export async function GET(
     const result = await client.query(query, values)
 
     if (result.rows.length === 0) {
+      const error = new Error('No URL found for this short URL')
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'No URL found for this short URL' },
+        { success: false, error },
         { status: 404 },
       )
     }
 
-    const urls: Url[] = result.rows
-    return NextResponse.json<ApiResponse<Url[]>>({ success: true, data: urls })
-  } catch (error) {
-    console.error('Error fetching URL:', error)
-    let errorMessage = 'An error occurred'
+    const urls: DBUrlRow[] = result.rows
+    return NextResponse.json<ApiResponse<DBUrlRow[]>>({
+      success: true,
+      data: urls,
+    })
+  } catch (error: unknown) {
     if (error instanceof Error) {
-      errorMessage = error.message
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error },
+        { status: 500 },
+      )
     }
     return NextResponse.json<ApiResponse<null>>(
-      { success: false, error: errorMessage },
+      { success: false, error: new Error('Internal server error') },
       { status: 500 },
     )
   } finally {
@@ -69,7 +71,7 @@ export async function DELETE(
 
     if (!userId) {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'User ID is required' },
+        { success: false, error: new Error('User ID is required') },
         { status: 400 },
       )
     }
@@ -84,23 +86,24 @@ export async function DELETE(
 
     if (result.rows.length === 0) {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'No URL found for this user' },
+        { success: false, error: new Error('No URL found for this user') },
         { status: 404 },
       )
     }
 
-    return NextResponse.json<ApiResponse<Url>>({
+    return NextResponse.json<ApiResponse<DBUrlRow>>({
       success: true,
       data: result.rows[0],
     })
-  } catch (error) {
-    console.error('Error deleting URL:', error)
-    let errorMessage = 'An error occurred'
+  } catch (error: unknown) {
     if (error instanceof Error) {
-      errorMessage = error.message
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error },
+        { status: 500 },
+      )
     }
     return NextResponse.json<ApiResponse<null>>(
-      { success: false, error: errorMessage },
+      { success: false, error: new Error('Internal server error') },
       { status: 500 },
     )
   } finally {
@@ -108,70 +111,72 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { slug: string } },
-): Promise<NextResponse> {
+const date = new Date()
+date.setHours(0, 0, 0, 0)
+export const updateUrlSchema = z.object({
+  user_id: z.string(),
+  original_url: z.string().url(),
+  expires_at: z.date().min(date).optional(),
+  max_views: z.number().min(1).optional(),
+  short_url: z.string(),
+})
+
+export async function PATCH(req: NextRequest): Promise<NextResponse> {
   const client = createClient()
-
   try {
-    const body = await req.json()
-    const userId = body.user_id
-    const shortUrl = params.slug
-
-    if (!userId) {
-      return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'User ID is required' },
-        { status: 400 },
-      )
-    }
-
     await client.connect()
 
-    const fetchQuery =
-      'SELECT expires_at, max_views FROM urls WHERE user_id = $1 AND short_url = $2;'
-    const fetchValues = [userId, shortUrl]
+    let body = (await req.json()) as z.infer<typeof updateUrlSchema>
 
-    const fetchResult = await client.query(fetchQuery, fetchValues)
+    if (body.expires_at) {
+      body.expires_at = new Date(body.expires_at)
+    }
 
-    if (fetchResult.rows.length === 0) {
+    console.log(updateUrlSchema.safeParse(body).error)
+
+    if (!updateUrlSchema.safeParse(body).success) {
       return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'No URL found for this user' },
+        { success: false, error: new Error('Invalid data') },
+        { status: 403 },
+      )
+    }
+
+    const { user_id, original_url, expires_at, max_views, short_url } = body
+
+    const updateQuery = await sql`
+      UPDATE urls SET
+      user_id = ${user_id},
+      original_url = ${original_url},
+      expires_at = ${expires_at?.toISOString()},
+      max_views =  ${max_views},
+      short_url = ${short_url}
+      WHERE short_url = ${short_url} RETURNING *;
+    `
+
+    const updateResult = updateQuery.rows[0] as DBUrlRow
+
+    console.log(updateResult)
+
+    if (!updateResult) {
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error: new Error("This url doesn't exists") },
         { status: 404 },
       )
     }
 
-    const existingUrl = fetchResult.rows[0]
-
-    const newShortUrl = body.short_url ?? existingUrl.short_url
-    const expiresAt = body.expires_at ?? existingUrl.expires_at
-    const maxViews = body.max_views ?? existingUrl.max_views
-
-    const updateQuery =
-      'UPDATE urls SET expires_at = $1, max_views = $2, short_url = $3 WHERE user_id = $4 AND short_url = $5 RETURNING *;'
-    const updateValues = [expiresAt, maxViews, newShortUrl, userId, shortUrl]
-
-    const updateResult = await client.query(updateQuery, updateValues)
-
-    if (updateResult.rows.length === 0) {
-      return NextResponse.json<ApiResponse<null>>(
-        { success: false, error: 'No URL found for this user' },
-        { status: 404 },
-      )
-    }
-
-    return NextResponse.json<ApiResponse<Url>>({
+    return NextResponse.json<ApiResponse<DBUrlRow>>({
       success: true,
-      data: updateResult.rows[0],
+      data: updateResult,
     })
   } catch (error) {
-    console.error('Error updating URL:', error)
-    let errorMessage = 'An error occurred'
     if (error instanceof Error) {
-      errorMessage = error.message
+      return NextResponse.json<ApiResponse<null>>(
+        { success: false, error },
+        { status: 500 },
+      )
     }
     return NextResponse.json<ApiResponse<null>>(
-      { success: false, error: errorMessage },
+      { success: false, error: new Error('Internal server error') },
       { status: 500 },
     )
   } finally {

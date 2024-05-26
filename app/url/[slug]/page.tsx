@@ -1,30 +1,59 @@
-import { FC } from 'react';
 import { redirect } from 'next/navigation'
+import { FC } from 'react'
+import { toast } from 'sonner'
 
-type Params = {
-  slug: string
-}
 type PageProps = {
-  params: Params;
-};
+  params: {
+    slug: string
+  }
+}
+type DataType =
+  | {
+      success: true
+      data: {
+        original_url: string
+      }
+    }
+  | {
+      success: false
+      error: Error
+    }
 
 const Page: FC<PageProps> = async ({ params }) => {
-  let url = null;
-  
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/url/${params.slug}`);
-    const data = await response.json();
+  let url
 
-    if (data.success) {
-      url = data.data.original_url
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/url/${params.slug}`,
+      { cache: 'no-store' },
+    )
+
+    if (!res.ok) {
+      toast.error('Error fetching url')
+    } else {
+      const data = (await res.json()) as DataType
+
+      if (!data.success) {
+        toast.error(data.error.message)
+      } else {
+        url = data.data.original_url
+      }
     }
-  } catch (error) {
-    console.error('Error fetching URL:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      toast.error(error.message)
+    } else {
+      toast.error('Error fetching url')
+    }
   }
 
   if (url) redirect(url)
 
-  return <div className='text-black h-screen flex justify-center items-center'>Redirecting...</div>;
-};
+  return (
+    <div className='flex h-screen items-center justify-center text-black'>
+      Redirecting...
+    </div>
+  )
+}
 
-export default Page;
+export default Page
