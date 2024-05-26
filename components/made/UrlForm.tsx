@@ -81,7 +81,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
     form.setValue('url', initialValue.url)
     form.setValue('expires', initialValue.expires)
     form.setValue('maxAmount', initialValue.maxAmount)
-  }, [initialValue])
+  }, [initialValue, form])
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit(values, form)
