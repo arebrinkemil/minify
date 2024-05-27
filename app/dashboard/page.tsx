@@ -59,7 +59,7 @@ const Dashboard: FC<DashboardProps> = async () => {
   }
 
   return (
-    <main className='mx-auto mt-20 h-[calc(100vh-79px)] max-w-[1440px] px-6 py-4'>
+    <main className='mx-auto h-[calc(100vh-79px)] max-w-[1440px] overflow-hidden px-6 py-4'>
       <UrlList urls={urls} />
     </main>
   )
