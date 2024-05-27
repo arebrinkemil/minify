@@ -28,6 +28,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.378.0",
     "next": "^14.2.3",
     "next-auth": "^4.24.7",

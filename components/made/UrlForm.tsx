@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  ChangeEvent,
-  FC,
-  InputHTMLAttributes,
-  useEffect,
-  useState,
-} from 'react'
+import { ChangeEvent, FC, useEffect, useState } from 'react'
 import {
   Form,
   FormControl,
@@ -16,15 +10,6 @@ import {
   FormMessage,
 } from '../ui/form'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { z } from 'zod'
 import { UseFormReturn, useForm } from 'react-hook-form'
@@ -39,8 +24,7 @@ import { HoverCard } from '@radix-ui/react-hover-card'
 import { HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
 import { DBUrlRow } from '@/types/types'
 import { toast } from 'sonner'
-import { QRCodeCanvas } from 'qrcode.react'
-
+import QRCodeDialog from './QrCode'
 const date = new Date()
 date.setHours(0, 0, 0, 0)
 
@@ -73,6 +57,7 @@ export type ResponseDataType =
       success: false
       error: Error
     }
+
 type UrlFormProps = {
   initialValue?: z.infer<typeof formSchema>
   onSubmit: (
@@ -184,24 +169,6 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             </FormItem>
           )}
         />
-        {initialValue ? (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant='outline'>Get QR Code</Button>
-            </DialogTrigger>
-            <DialogContent className='sm:max-w-[425px]'>
-              <div className='flex h-full w-full items-center justify-center gap-4 py-4'>
-                <QRCodeCanvas
-                  style={{ width: '100%', height: 'auto', maxHeight: '100vh' }}
-                  value={initialValue.url}
-                />{' '}
-              </div>
-              <DialogFooter>
-                <Button type='submit'>Save changes</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        ) : null}
 
         <FormField
           control={form.control}
@@ -329,13 +296,14 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             </FormItem>
           )}
         />
-        <Button
-          type='submit'
-          className='sm:col-span-2'
-          disabled={!form.formState.isValid}
-        >
-          {!initialValue ? 'Create' : 'Save'}
-        </Button>
+        <div className='col-span-2 grid gap-4 md:grid-cols-2'>
+          <Button type='submit' disabled={!form.formState.isValid}>
+            {!initialValue ? 'Create' : 'Save'}
+          </Button>
+          <div>
+            {initialValue ? <QRCodeDialog url={initialValue.url} /> : null}
+          </div>
+        </div>
       </form>
     </Form>
   )
