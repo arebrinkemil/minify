@@ -9,7 +9,7 @@ export type UrlType = {
   created_at: string
   expires_at: string
   views: number
-  max_views: null
+  max_views: number
   full_short: string
 }
 
@@ -42,12 +42,17 @@ const Dashboard: FC<DashboardProps> = async () => {
 
     if (res.ok) {
       const { data } = await res.json()
-      urls = (data.urls as UrlType[]).map(url => {
-        return {
-          ...url,
-          full_short: `${process.env.NEXT_PUBLIC_BASE_URL}/url/${url.short_url}`,
-        }
-      })
+      urls = (data.urls as UrlType[])
+        .map(url => {
+          return {
+            ...url,
+            full_short: `${process.env.NEXT_PUBLIC_BASE_URL}/url/${url.short_url}`,
+          }
+        })
+        .sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        )
     }
   } catch (error: unknown) {
     if (error instanceof Error) console.log(error)

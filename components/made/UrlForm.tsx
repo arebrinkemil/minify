@@ -1,4 +1,6 @@
-import { Dispatch, FC, SetStateAction } from 'react'
+'use client'
+
+import { FC, useEffect } from 'react'
 import {
   Form,
   FormControl,
@@ -8,7 +10,7 @@ import {
   FormMessage,
 } from '../ui/form'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
+import { UseFormReturn, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from '../ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
@@ -19,35 +21,13 @@ import { Calendar } from '../ui/calendar'
 import { format } from 'date-fns'
 import { HoverCard } from '@radix-ui/react-hover-card'
 import { HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
-import { useSession } from 'next-auth/react'
-import { toast } from 'sonner'
-
-type DataType = {
-  user_id: string | null
-  original_url: string
-  short_url: string
-  created_at: string
-  expires_at: string
-  views: number
-  max_views: number
-}
-type ResponseDataType =
-  | {
-      success: true
-      data: DataType
-    }
-  | {
-      success: false
-      error: Error
-    }
-type UrlFormProps = {
-  setValue: Dispatch<SetStateAction<string>>
-}
+import { UrlType } from '@/app/dashboard/page'
+import { DBUrlRow } from '@/types/types'
 
 const date = new Date()
 date.setHours(0, 0, 0, 0)
 
-const formSchema = z.object({
+export const formSchema = z.object({
   url: z.string().url({ message: 'Invalid url' }),
   expires: z
     .date()
@@ -66,79 +46,45 @@ const formSchema = z.object({
     .optional(),
 })
 
-const UrlForm: FC<UrlFormProps> = ({ setValue }) => {
+export type ResponseDataType =
+  | {
+      success: true
+      data: DBUrlRow
+    }
+  | {
+      success: false
+      error: Error
+    }
+type UrlFormProps = {
+  initialValue?: z.infer<typeof formSchema>
+  onSubmit: (
+    values: z.infer<typeof formSchema>,
+    form: UseFormReturn<z.infer<typeof formSchema>, any, undefined>,
+  ) => void
+}
+
+const defaultValues = {
+  url: '',
+  expires: undefined,
+  maxAmount: '',
+}
+
+const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      url: '',
-      expires: undefined,
-      maxAmount: '',
-    },
+    defaultValues: initialValue ?? defaultValues,
   })
-  const session = useSession()
+
+  useEffect(() => {
+    if (!initialValue) return
+
+    form.setValue('url', initialValue.url)
+    form.setValue('expires', initialValue.expires)
+    form.setValue('maxAmount', initialValue.maxAmount)
+  }, [initialValue, form])
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    const submitPromise = new Promise(async (resolve, reject) => {
-      const user = session.data?.user
-
-      if (!user) {
-        reject(new Error('Failed to get user session, please try again.'))
-        return
-      }
-
-      try {
-        const { url, expires, maxAmount } = values
-
-        const req: RequestInit = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            original_url: url,
-            expires_at: expires || null,
-            max_views: maxAmount ? parseInt(maxAmount) : null,
-            user_id: user.id,
-          }),
-        }
-
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/url`,
-          req,
-        )
-
-        if (!res.ok) {
-          reject(new Error('Failed to add new url, please try again.'))
-          return
-        }
-
-        const data = (await res.json()) as ResponseDataType
-
-        if (!data.success) {
-          reject(data.error)
-          return
-        }
-
-        const { short_url } = data.data
-
-        setValue(`${process.env.NEXT_PUBLIC_BASE_URL}/url/${short_url}`)
-
-        form.reset()
-        resolve(res.ok)
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          reject(error)
-        }
-
-        reject({ message: 'Error creating url' })
-      }
-    })
-
-    toast.promise(submitPromise, {
-      loading: 'Creatin new url',
-      success: 'Url created successfully',
-      error: (error: Error) => error.message,
-    })
+    onSubmit(values, form)
   }
 
   return (
@@ -255,7 +201,7 @@ const UrlForm: FC<UrlFormProps> = ({ setValue }) => {
           className='sm:col-span-2'
           disabled={!form.formState.isValid}
         >
-          Create short url
+          {!initialValue ? 'Create' : 'Save'}
         </Button>
       </form>
     </Form>

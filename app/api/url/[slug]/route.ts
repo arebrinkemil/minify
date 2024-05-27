@@ -1,46 +1,63 @@
-
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from "@vercel/postgres";
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient, sql } from '@vercel/postgres'
+import { DBUrlRow } from '@/types/types'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: { slug: string } },
 ) {
-  const client = createClient();
-  const slug = params.slug;
+  const client = createClient()
+  const slug = params.slug
 
   try {
-    await client.connect();
+    await client.connect()
 
-    const query = 'SELECT original_url, views, max_views FROM urls WHERE short_url = $1;';
-    const values = [slug];
+    const query = await sql`
+      SELECT  original_url, views, max_views
+      FROM urls WHERE short_url = ${slug};
+    `
 
-    const updateQuery = 'UPDATE urls SET views = views + 1 WHERE short_url = $1';
-    await client.query(updateQuery, values);
-
-    const result = await client.query(query, values);
-
-    if (result.rows.length === 0) {
-      return NextResponse.json({ success: false, error: 'URL not found' }, { status: 404 });
+    if (!query.rows.length) {
+      return NextResponse.json(
+        { success: false, error: new Error('URL not found') },
+        { status: 404 },
+      )
     }
 
-    const { original_url, views, max_views } = result.rows[0];
+    const { original_url, views, max_views } = query.rows[0] as DBUrlRow
 
-    if (max_views && views >= max_views) {
-      return NextResponse.json({ success:false, error: 'URL has reached maximun amount of visists.'}, {status: 403})
+    if (max_views && views + 1 >= max_views) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: new Error('URL has reached maximun amount of visists.'),
+        },
+        { status: 403 },
+      )
     }
 
-    return NextResponse.json({ success: true, data: { original_url } });
-    
+    sql`
+      UPDATE urls SET
+      views = views + 1
+      WHERE  short_url = ${slug}; 
+    `
 
+    return NextResponse.json(
+      {
+        success: true,
+        data: { original_url },
+      },
+      { status: 200 },
+    )
   } catch (error) {
-    console.error('Error fetching URL:', error);
-    let errorMessage = 'An error occurred';
     if (error instanceof Error) {
-      errorMessage = error.message;
+      return NextResponse.json({ success: false, error }, { status: 500 })
     }
-    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: new Error('Internal server error') },
+      { status: 500 },
+    )
   } finally {
-    await client.end();
+    await client.end()
   }
 }
