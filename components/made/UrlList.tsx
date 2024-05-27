@@ -317,7 +317,7 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
                 <h1>
                   {selectedUrl.views >= selectedUrl.max_views
                     ? 'The link has reached its maximum view limit.'
-                    : `The link has been viewed ${selectedUrl.views.toString()} times`}
+                    : `The link has been viewed ${selectedUrl.views.toString()} time(s).`}
                 </h1>
                 {selectedUrl.views >= selectedUrl.max_views && (
                   <Button
