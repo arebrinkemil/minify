@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react'
 import { Input } from '../ui/input'
-import { Card, CardContent, CardHeader } from '../ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '../ui/card'
 import { Button } from '../ui/button'
 import useWindowSize from '@/hooks/useWindowSize'
 import { Menu, Trash2, X } from 'lucide-react'
@@ -219,7 +219,7 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
     <section className='flex h-full flex-col gap-4 lg:flex-row'>
       <Card
         className={cn(
-          'absolute right-full h-[calc(100vh-79px-32px)] w-[calc(100vw-48px)] max-w-[500px] transition-all duration-300 lg:static',
+          'absolute right-full z-20 h-[calc(100vh-79px-32px)] w-[calc(100vw-48px)] max-w-[400px] transition-all duration-300 lg:static',
           {
             'translate-x-[calc(100%+24px)]':
               showList && size && size.width <= 1024,
@@ -297,7 +297,7 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
         )}
         <CardContent className='h-full lg:py-4'>
           {selectedUrl ? (
-            <section className='flex flex-col gap-6 md:gap-16'>
+            <section className='flex flex-col gap-4 md:gap-16'>
               <ClipbordCopy url={selectedUrl?.full_short || ''} />
               <UrlForm
                 initialValue={{
@@ -313,25 +313,30 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
                 }}
                 onSubmit={handleSubmit}
               />
-              <Card className='flex flex-row items-center justify-between p-2'>
-                <h1>
-                  {selectedUrl.max_views !== null &&
-                  selectedUrl.views >= selectedUrl.max_views
-                    ? 'The link has reached its maximum view limit.'
-                    : `The link has been viewed ${selectedUrl.views.toString()} time(s).`}
-                </h1>
-                {selectedUrl.views >= selectedUrl.max_views && (
-                  <Button
-                    onClick={() => {
-                      setSelectedUrl({
-                        ...selectedUrl,
-                        max_views: selectedUrl.max_views + 10,
-                      })
-                    }}
-                  >
-                    Increase Max Views
-                  </Button>
-                )}
+              <Card className='sm:flex sm:flex-row sm:items-center sm:justify-between'>
+                <CardContent className='pt-6 text-center'>
+                  <p className='text-md'>
+                    {selectedUrl.max_views !== null &&
+                    selectedUrl.views >= selectedUrl.max_views
+                      ? 'The link has reached its maximum view limit.'
+                      : `The link has been viewed ${selectedUrl.views.toString()} time(s).`}
+                  </p>
+                </CardContent>
+                <CardFooter className='sm:pt-6'>
+                  {selectedUrl.views >= selectedUrl.max_views && (
+                    <Button
+                      className='w-full'
+                      onClick={() => {
+                        setSelectedUrl({
+                          ...selectedUrl,
+                          max_views: selectedUrl.max_views + 10,
+                        })
+                      }}
+                    >
+                      Increase Max Views
+                    </Button>
+                  )}
+                </CardFooter>
               </Card>
             </section>
           ) : (
