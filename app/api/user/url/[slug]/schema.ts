@@ -10,3 +10,7 @@ export const updateUrlSchema = z.object({
   max_views: z.number().min(1).optional(),
   short_url: z.string(),
 })
+
+export const deleteUrlSchema = z.object({
+  user_id: z.string().uuid(),
+})
