@@ -154,7 +154,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
         autoComplete='off'
-        className='grid grid-cols-1 gap-4 sm:grid-cols-2'
+        className='grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-4'
       >
         <FormField
           control={form.control}
@@ -180,7 +180,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='shortUrl'
           render={({ field: { onChange, ...rest } }) => (
-            <FormItem className='sm:col-span-2'>
+            <FormItem className='sm:cols-span-1 col-span-2'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Custom short url (optional)
                 <HoverCard>
@@ -209,7 +209,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='expires'
           render={({ field }) => (
-            <FormItem className='md:cols-span-1 col-span-2 flex flex-col'>
+            <FormItem className='sm:cols-span-1 col-span-2 flex flex-col'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Expires (optional)
                 <HoverCard>
@@ -276,7 +276,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='maxAmount'
           render={({ field }) => (
-            <FormItem className='md:cols-span-1 col-span-2'>
+            <FormItem className='sm:cols-span-1 col-span-2'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Max views (optional)
                 <HoverCard>
@@ -303,7 +303,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           )}
         />
 
-        <div className='col-span-2 grid gap-4 md:grid-cols-2'>
+        <div className='col-span-2 grid gap-4 sm:grid-cols-2'>
           <Button type='submit' disabled={!form.formState.isValid}>
             {!initialValue ? 'Create' : 'Save'}
           </Button>
@@ -311,7 +311,6 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             {initialValue ? <QRCodeDialog url={initialValue.url} /> : null}
           </div>
         </div>
-
       </form>
     </Form>
   )
