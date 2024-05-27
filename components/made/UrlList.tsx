@@ -315,7 +315,8 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
               />
               <Card className='flex flex-row items-center justify-between p-2'>
                 <h1>
-                  {selectedUrl.views >= selectedUrl.max_views
+                  {selectedUrl.max_views !== null &&
+                  selectedUrl.views >= selectedUrl.max_views
                     ? 'The link has reached its maximum view limit.'
                     : `The link has been viewed ${selectedUrl.views.toString()} time(s).`}
                 </h1>
