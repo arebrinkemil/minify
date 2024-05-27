@@ -196,6 +196,8 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
         setInitUrls(filterList)
         setUrlList(filterList)
 
+        setSelectedUrl(null)
+
         resolve(body.data)
       } catch (error: unknown) {
         if (error instanceof Error) {
