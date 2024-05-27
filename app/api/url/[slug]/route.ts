@@ -13,7 +13,7 @@ export async function GET(
     await client.connect()
 
     const query = await sql`
-      SELECT  original_url, views, max_views
+      SELECT  original_url, views, max_views, expires_at
       FROM urls WHERE short_url = ${slug};
     `
 
@@ -24,13 +24,25 @@ export async function GET(
       )
     }
 
-    const { original_url, views, max_views } = query.rows[0] as DBUrlRow
+    const { original_url, views, max_views, expires_at } = query.rows[0] as DBUrlRow
 
-    if (max_views && views + 1 >= max_views) {
+    if (max_views && views >= max_views) {
       return NextResponse.json(
         {
           success: false,
           error: new Error('URL has reached maximun amount of visists.'),
+        },
+        { status: 403 },
+      )
+    }
+
+    const currentDate = new Date();
+
+    if (new Date(expires_at) < currentDate) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: new Error('Times up!'),
         },
         { status: 403 },
       )
