@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@vercel/postgres'
 import { generateShortUrl } from '@/lib/urlUtils'
+import { z } from 'zod'
+import { updateUrlSchema } from './schema'
 
 export async function POST(req: NextRequest) {
   const client = createClient()
@@ -10,11 +12,18 @@ export async function POST(req: NextRequest) {
 
     const genShortUrl = generateShortUrl()
 
-    const { original_url, expires_at, max_views, user_id, short_url } =
-      await req.json()
+    const body: z.infer<typeof updateUrlSchema> = await req.json()
 
-    const shortUrl: string =
-      short_url && short_url.length > 0 ? short_url : genShortUrl
+    if (!updateUrlSchema.safeParse(body).success) {
+      return NextResponse.json(
+        { success: false, error: new Error('Invalid data') },
+        { status: 403 },
+      )
+    }
+
+    const { original_url, expires_at, max_views, user_id, short_url } = body
+
+    const shortUrl = short_url && short_url.length > 0 ? short_url : genShortUrl
 
     const query = `
       INSERT INTO urls (original_url, short_url, expires_at, max_views, user_id)

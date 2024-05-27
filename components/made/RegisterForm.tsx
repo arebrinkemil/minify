@@ -17,23 +17,13 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import { registerSchema } from '@/app/api/auth/register/schema'
 
 type FormProps = {}
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: 'Name must be at least 2 characters long' })
-    .max(250, { message: "Name can't be longer then 250 characters long" }),
-  email: z.string().email({ message: 'Pleas provide a valid email' }),
-  password: z
-    .string()
-    .min(8, { message: 'Password must be at least 8 characters long' }),
-})
-
 const RegisterForm: FC<FormProps> = ({}) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
       email: '',
@@ -42,49 +32,51 @@ const RegisterForm: FC<FormProps> = ({}) => {
   })
   const router = useRouter()
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     const submitPromise = new Promise(async (resolve, reject) => {
-        try {
-          const res = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/register`,
-            {
-              method: 'POST',
-              body: JSON.stringify(values),
-            },
-          )
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/register`,
+          {
+            method: 'POST',
+            body: JSON.stringify(values),
+          },
+        )
 
-          if (!res.ok) {
-            const errorData = await res.json();
-            console.log(errorData.error)
-            reject(errorData.error);
-            return;
-          }
-
-          const credentials = {
-            email: values.email,
-            password: values.password
-          }
-
-          const resSignIn = await signIn("credentials", { ...credentials, redirect: false });
-
-          resolve(true);
-
-          if (!resSignIn?.error) {
-            router.push("/");
-            router.refresh();
-          }
-
-        } catch (error: unknown) {
-          if (error instanceof Error) {
-            reject(error)
-          }
+        if (!res.ok) {
+          const errorData = await res.json()
+          console.log(errorData.error)
+          reject(errorData.error)
+          return
         }
+
+        const credentials = {
+          email: values.email,
+          password: values.password,
+        }
+
+        const resSignIn = await signIn('credentials', {
+          ...credentials,
+          redirect: false,
+        })
+
+        resolve(true)
+
+        if (!resSignIn?.error) {
+          router.push('/')
+          router.refresh()
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          reject(error)
+        }
+      }
     })
 
     toast.promise(submitPromise, {
-        loading: `Creating account for ${values.name}`,
-        success: `${values.name} your account is created`,
-        error: (error: Error) => error.message || "Failed to create new account"
+      loading: `Creating account for ${values.name}`,
+      success: `${values.name} your account is created`,
+      error: (error: Error) => error.message || 'Failed to create new account',
     })
   }
 
