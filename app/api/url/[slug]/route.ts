@@ -12,6 +12,8 @@ export async function GET(
   try {
     await client.connect()
     console.log(slug, 'requested')
+    const testQuery = await sql`SELECT * FROM urls;`
+    console.log('Test query:', testQuery)
     const query = await sql`
       SELECT  original_url, views, max_views, expires_at, user_id
       FROM urls WHERE short_url = ${slug};
