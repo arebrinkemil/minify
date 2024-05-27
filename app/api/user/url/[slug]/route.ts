@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, sql } from '@vercel/postgres'
 import { z } from 'zod'
 import { DBUrlRow } from '@/types/types'
+import { updateUrlSchema } from './schema'
 
 type ApiResponse<T> =
   | {
@@ -110,16 +111,6 @@ export async function DELETE(
     await client.end()
   }
 }
-
-const date = new Date()
-date.setHours(0, 0, 0, 0)
-export const updateUrlSchema = z.object({
-  user_id: z.string(),
-  original_url: z.string().url(),
-  expires_at: z.date().min(date).optional(),
-  max_views: z.number().min(1).optional(),
-  short_url: z.string(),
-})
 
 export async function PATCH(req: NextRequest): Promise<NextResponse> {
   const client = createClient()

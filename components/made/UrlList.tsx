@@ -20,7 +20,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
-import { updateUrlSchema } from '@/app/api/user/url/[slug]/route'
+import { updateUrlSchema } from '@/app/api/user/url/[slug]/schema'
 
 type UrlListProps = {
   urls: UrlType[]
