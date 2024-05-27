@@ -1,12 +1,12 @@
-import { redirect } from 'next/navigation'
 import { FC } from 'react'
-import { toast } from 'sonner'
+import ClientComponent from './ClientComponent'
 
 type PageProps = {
   params: {
     slug: string
   }
 }
+
 type DataType =
   | {
       success: true
@@ -20,7 +20,9 @@ type DataType =
     }
 
 const Page: FC<PageProps> = async ({ params }) => {
-  let url
+  let url = ''
+  let errorMessage = ''
+  let notFound = false
 
   try {
     const res = await fetch(
@@ -28,31 +30,33 @@ const Page: FC<PageProps> = async ({ params }) => {
       { cache: 'no-store' },
     )
 
-    if (!res.ok) {
-      toast.error('Error fetching url')
+    if (res.status === 404) {
+      notFound = true
+    } else if (!res.ok) {
+      errorMessage = 'Error fetching url'
     } else {
       const data = (await res.json()) as DataType
 
       if (!data.success) {
-        toast.error(data.error.message)
+        errorMessage = data.error.message
       } else {
         url = data.data.original_url
       }
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      toast.error(error.message)
+      errorMessage = error.message
     } else {
-      toast.error('Error fetching url')
+      errorMessage = 'Error fetching url'
     }
   }
 
-  if (url) redirect(url)
-
   return (
-    <div className='flex h-screen items-center justify-center text-black'>
-      Redirecting...
-    </div>
+    <ClientComponent
+      url={url}
+      errorMessage={errorMessage}
+      notFound={notFound}
+    />
   )
 }
 
