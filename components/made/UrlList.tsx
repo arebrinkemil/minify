@@ -309,9 +309,29 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
                     ? selectedUrl.max_views.toString()
                     : '',
                   shortUrl: selectedUrl.short_url,
+                  views: selectedUrl.views.toString(),
                 }}
                 onSubmit={handleSubmit}
               />
+              <Card className='flex flex-row items-center justify-between p-2'>
+                <h1>
+                  {selectedUrl.views >= selectedUrl.max_views
+                    ? 'The link has reached its maximum view limit.'
+                    : `The link has been viewed ${selectedUrl.views.toString()} time(s).`}
+                </h1>
+                {selectedUrl.views >= selectedUrl.max_views && (
+                  <Button
+                    onClick={() => {
+                      setSelectedUrl({
+                        ...selectedUrl,
+                        max_views: selectedUrl.max_views + 10,
+                      })
+                    }}
+                  >
+                    Increase Max Views
+                  </Button>
+                )}
+              </Card>
             </section>
           ) : (
             <div className='grid h-full place-content-center text-lg font-medium text-border'>

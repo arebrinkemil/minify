@@ -46,6 +46,7 @@ export const formSchema = z.object({
     })
     .optional(),
   shortUrl: z.string().optional(),
+  views: z.string().optional(),
 })
 
 export type ResponseDataType =
@@ -64,6 +65,7 @@ type UrlFormProps = {
     values: z.infer<typeof formSchema>,
     form: UseFormReturn<z.infer<typeof formSchema>, any, undefined>,
   ) => void
+  showViews?: boolean
 }
 
 const defaultValues: z.infer<typeof formSchema> = {
@@ -71,6 +73,7 @@ const defaultValues: z.infer<typeof formSchema> = {
   expires: undefined,
   maxAmount: '',
   shortUrl: '',
+  views: '',
 }
 
 const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
@@ -83,6 +86,8 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
     initialValue?.expires,
   )
 
+  const [views, setViews] = useState(0)
+
   useEffect(() => {
     if (!initialValue) return
 
@@ -92,6 +97,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
     form.setValue('expires', initialValue.expires)
     form.setValue('maxAmount', initialValue.maxAmount)
     form.setValue('shortUrl', initialValue.shortUrl)
+    form.setValue('views', initialValue.views)
     setSelectedDate(initialValue.expires)
   }, [initialValue, form])
 
@@ -272,13 +278,13 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
-                Max clicks (optional)
+                Max views (optional)
                 <HoverCard>
                   <HoverCardTrigger className='cursor-pointer'>
                     <Info size={16} />
                   </HoverCardTrigger>
                   <HoverCardContent>
-                    Set the maximum clicks allowed for this URL before it is
+                    Set the maximum views allowed for this URL before it is
                     disabled.
                   </HoverCardContent>
                 </HoverCard>
@@ -296,6 +302,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             </FormItem>
           )}
         />
+
         <div className='col-span-2 grid gap-4 md:grid-cols-2'>
           <Button type='submit' disabled={!form.formState.isValid}>
             {!initialValue ? 'Create' : 'Save'}
@@ -304,6 +311,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             {initialValue ? <QRCodeDialog url={initialValue.url} /> : null}
           </div>
         </div>
+
       </form>
     </Form>
   )

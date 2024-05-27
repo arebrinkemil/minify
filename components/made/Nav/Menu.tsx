@@ -24,7 +24,7 @@ type MenuProps = {
 
 const Menu: FC<MenuProps> = ({ session }) => {
   return (
-    <NavigationMenu className='max-w-screen fixed inset-0 z-10 flex h-[79px] w-screen items-center justify-between border-b border-s-zinc-200 bg-background px-4 py-1 md:px-8'>
+    <NavigationMenu className='max-w-screen sticky inset-0 z-10 flex h-[79px] w-screen items-center justify-between border-b border-s-zinc-200 bg-background px-4 py-1 md:px-8'>
       <NavigationMenuList>
         <NavigationMenuItem>
           <Link href='/'>

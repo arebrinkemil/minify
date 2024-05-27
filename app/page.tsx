@@ -8,7 +8,7 @@ import HomeMenu from '@/components/made/HomeMenu'
 
 const Home = () => {
   return (
-    <main className='mx-auto mt-[79px] flex h-[calc(100vh-79px)] max-w-[1440px] flex-col gap-8 p-4 md:gap-16'>
+    <main className='mx-auto flex max-w-[1440px] flex-col gap-8 p-4 md:gap-16'>
       <header className='flex flex-col items-center justify-center gap-2'>
         <h1 className='text-6xl font-bold'>Minify</h1>
         <p className='text-lg'>Easily shorten your url with minify</p>
