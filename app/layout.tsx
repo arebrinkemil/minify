@@ -4,6 +4,7 @@ import './globals.css'
 import Navbar from '../components/made/Nav'
 import { Toaster } from '@/components/ui/sonner'
 import SessionWrapper from '@/components/made/SessionWrapper'
+import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -19,10 +20,17 @@ export default function RootLayout({
 }>) {
   return (
     <SessionWrapper>
-      <html lang='en'>
+      <html lang='en' className='dark' suppressHydrationWarning>
         <body className={inter.variable}>
-          <Navbar />
-          {children}
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='system'
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Navbar />
+            {children}
+          </ThemeProvider>
           <Toaster />
         </body>
       </html>

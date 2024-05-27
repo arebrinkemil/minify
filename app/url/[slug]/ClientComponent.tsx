@@ -3,7 +3,7 @@
 import { FC, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import errorPic from '@/public/3804918.jpg'
+import errorPic from '@/public/Monster_404.png'
 
 type ClientComponentProps = {
   url: string
@@ -31,11 +31,11 @@ const ClientComponent: FC<ClientComponentProps> = ({
   if (notFound) {
     return (
       <div className='flex h-screen flex-col items-center justify-center text-black'>
-        <img style={{ maxWidth: '250px' }} src={errorPic.src}></img>
+        <img style={{ maxWidth: '350px' }} src={errorPic.src}></img>
         <h2>URL not found or expired</h2>
         <div>
           <button
-            className='bg-button m-auto mt-4 rounded px-4 py-2 text-white'
+            className='m-auto mt-4 rounded bg-button px-4 py-2 text-white'
             onClick={() => router.push('/')}
           >
             Go back
