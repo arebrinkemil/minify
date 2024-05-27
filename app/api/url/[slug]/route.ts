@@ -11,24 +11,13 @@ export async function GET(
 
   try {
     await client.connect()
-    console.log(slug, 'requested')
-    const testQuery = await sql`SELECT * FROM urls;`
-    console.log('Test query:', testQuery)
-    const querytester = await client.query(
-      'SELECT original_url, views, max_views, expires_at, user_id FROM urls WHERE short_url = $1',
-      ['broke'],
-    )
 
-    console.log('Query tester:', querytester.rows)
     const query = await client.query(
       'SELECT original_url, views, max_views, expires_at, user_id FROM urls WHERE short_url = $1',
       [slug],
     )
-    console.log('Query result:', query.rows)
-    console.log('Query:', query)
 
     if (!query.rows.length) {
-      console.log('URL not found')
       return NextResponse.json(
         { success: false, error: new Error('URL not found') },
         { status: 404 },
@@ -39,7 +28,6 @@ export async function GET(
       .rows[0] as DBUrlRow
 
     if (max_views && views >= max_views) {
-      console.log('URL has reached maximun amount of visists.')
       return NextResponse.json(
         {
           success: false,
@@ -50,7 +38,6 @@ export async function GET(
     }
 
     if (expires_at && new Date(expires_at) < new Date()) {
-      console.log('Times up!')
       if (!user_id) {
         await sql`
           DELETE FROM urls WHERE short_url = ${slug}
@@ -71,8 +58,6 @@ export async function GET(
       views = views + 1
       WHERE  short_url = ${slug}; 
     `
-
-    console.log('Redirecting to:', original_url)
 
     return NextResponse.json(
       {
