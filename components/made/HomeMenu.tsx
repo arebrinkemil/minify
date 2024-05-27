@@ -18,7 +18,7 @@ const HomeMenu = () => {
   ) => {
     const submitPromise = new Promise(async (resolve, reject) => {
       try {
-        const { url, expires, maxAmount } = values
+        const { url, expires, maxAmount, shortUrl } = values
 
         const req: RequestInit = {
           method: 'POST',
@@ -30,6 +30,7 @@ const HomeMenu = () => {
             expires_at: expires || null,
             max_views: maxAmount ? parseInt(maxAmount) : null,
             user_id: session.data?.user.id || null,
+            short_url: shortUrl,
           }),
         }
 

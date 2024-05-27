@@ -79,14 +79,14 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
       if (!selectedUrl || !user) return
 
       try {
-        const { url, expires, maxAmount } = values
+        const { url, expires, maxAmount, shortUrl } = values
 
         const body: z.infer<typeof updateUrlSchema> = {
           original_url: url,
           expires_at: expires,
           max_views: maxAmount ? parseInt(maxAmount) : undefined,
           user_id: user.id,
-          short_url: selectedUrl.short_url,
+          short_url: shortUrl || '',
         }
 
         const req: RequestInit = {
@@ -122,6 +122,7 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
           expires_at,
           max_views,
           original_url,
+          short_url,
         }
 
         setSelectedUrl(updatedUrl)
@@ -219,6 +220,7 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
                   maxAmount: selectedUrl.max_views
                     ? selectedUrl.max_views.toString()
                     : '',
+                  shortUrl: selectedUrl.short_url,
                 }}
                 onSubmit={handleSubmit}
               />
