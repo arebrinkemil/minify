@@ -83,6 +83,9 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
     resolver: zodResolver(formSchema),
     defaultValues: initialValue ?? defaultValues,
   })
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    initialValue?.expires,
+  )
 
   useEffect(() => {
     if (!initialValue) return
@@ -93,6 +96,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
     form.setValue('expires', initialValue.expires)
     form.setValue('maxAmount', initialValue.maxAmount)
     form.setValue('shortUrl', initialValue.shortUrl)
+    setSelectedDate(initialValue.expires)
   }, [initialValue, form])
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
@@ -136,6 +140,11 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
     form.setValue('shortUrl', shortPath)
 
     setTimer(setTimeout(() => isShortUrlTaken(shortPath), 300))
+  }
+
+  const clearDate = () => {
+    form.setValue('expires', undefined)
+    setSelectedDate(undefined)
   }
 
   return (
@@ -209,39 +218,53 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
                   </HoverCardContent>
                 </HoverCard>
               </FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      tabIndex={2}
-                      variant={'outline'}
-                      className={cn(
-                        'pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground',
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, 'PPP')
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className='w-auto p-0' align='start'>
-                  <Calendar
-                    mode='single'
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={date => {
-                      const tomorrow = new Date()
-                      tomorrow.setDate(tomorrow.getDate() - 1)
-                      return date < tomorrow
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className='flex items-center'>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        tabIndex={2}
+                        variant={'outline'}
+                        className={cn(
+                          'flex-1 pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground',
+                        )}
+                      >
+                        {selectedDate ? (
+                          format(selectedDate, 'PPP')
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0' align='start'>
+                    <Calendar
+                      mode='single'
+                      selected={selectedDate}
+                      onSelect={date => {
+                        field.onChange(date)
+                        setSelectedDate(date)
+                      }}
+                      disabled={date => {
+                        const tomorrow = new Date()
+                        tomorrow.setDate(tomorrow.getDate() - 1)
+                        return date < tomorrow
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {selectedDate && (
+                  <Button
+                    variant='outline'
+                    onClick={clearDate}
+                    className='ml-2'
+                  >
+                    Clear Date
+                  </Button>
+                )}
+              </div>
               <FormMessage className='text-start' />
             </FormItem>
           )}
