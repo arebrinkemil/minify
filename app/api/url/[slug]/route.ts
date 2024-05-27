@@ -18,6 +18,7 @@ export async function GET(
     `
 
     if (!query.rows.length) {
+      console.log('URL not found')
       return NextResponse.json(
         { success: false, error: new Error('URL not found') },
         { status: 404 },
@@ -28,6 +29,7 @@ export async function GET(
       .rows[0] as DBUrlRow
 
     if (max_views && views >= max_views) {
+      console.log('URL has reached maximun amount of visists.')
       return NextResponse.json(
         {
           success: false,
@@ -38,6 +40,7 @@ export async function GET(
     }
 
     if (expires_at && new Date(expires_at) < new Date()) {
+      console.log('Times up!')
       if (!user_id) {
         await sql`
           DELETE FROM urls WHERE short_url = ${slug}
