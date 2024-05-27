@@ -12,7 +12,11 @@ export async function POST(req: NextRequest) {
 
     const genShortUrl = generateShortUrl()
 
-    const body: z.infer<typeof updateUrlSchema> = await req.json()
+    let body: z.infer<typeof updateUrlSchema> = await req.json()
+
+    if (body.expires_at) {
+      body.expires_at = new Date(body.expires_at)
+    }
 
     if (!updateUrlSchema.safeParse(body).success) {
       return NextResponse.json(
