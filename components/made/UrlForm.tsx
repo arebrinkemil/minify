@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  ChangeEvent,
-  FC,
-  InputHTMLAttributes,
-  useEffect,
-  useState,
-} from 'react'
+import { ChangeEvent, FC, useEffect, useState } from 'react'
 import {
   Form,
   FormControl,
@@ -15,12 +9,13 @@ import {
   FormLabel,
   FormMessage,
 } from '../ui/form'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { z } from 'zod'
 import { UseFormReturn, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from '../ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { Button } from '../ui/button'
 import { cn } from '@/lib/utils'
 import { CalendarIcon, Info } from 'lucide-react'
 import { Calendar } from '../ui/calendar'
@@ -29,7 +24,7 @@ import { HoverCard } from '@radix-ui/react-hover-card'
 import { HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
 import { DBUrlRow } from '@/types/types'
 import { toast } from 'sonner'
-
+import QRCodeDialog from './QrCode'
 const date = new Date()
 date.setHours(0, 0, 0, 0)
 
@@ -63,6 +58,7 @@ export type ResponseDataType =
       success: false
       error: Error
     }
+
 type UrlFormProps = {
   initialValue?: z.infer<typeof formSchema>
   onSubmit: (
@@ -179,6 +175,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name='shortUrl'
@@ -306,13 +303,15 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           )}
         />
 
-        <Button
-          type='submit'
-          className='sm:col-span-2'
-          disabled={!form.formState.isValid}
-        >
-          {!initialValue ? 'Create' : 'Save'}
-        </Button>
+        <div className='col-span-2 grid gap-4 md:grid-cols-2'>
+          <Button type='submit' disabled={!form.formState.isValid}>
+            {!initialValue ? 'Create' : 'Save'}
+          </Button>
+          <div>
+            {initialValue ? <QRCodeDialog url={initialValue.url} /> : null}
+          </div>
+        </div>
+
       </form>
     </Form>
   )
