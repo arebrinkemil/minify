@@ -59,6 +59,8 @@ export async function GET(
       WHERE  short_url = ${slug}; 
     `
 
+    console.log('Redirecting to:', original_url)
+
     return NextResponse.json(
       {
         success: true,
