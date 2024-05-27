@@ -1,6 +1,12 @@
 'use client'
 
-import { FC, useEffect } from 'react'
+import {
+  ChangeEvent,
+  FC,
+  InputHTMLAttributes,
+  useEffect,
+  useState,
+} from 'react'
 import {
   Form,
   FormControl,
@@ -21,8 +27,8 @@ import { Calendar } from '../ui/calendar'
 import { format } from 'date-fns'
 import { HoverCard } from '@radix-ui/react-hover-card'
 import { HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
-import { UrlType } from '@/app/dashboard/page'
 import { DBUrlRow } from '@/types/types'
+import { toast } from 'sonner'
 
 const date = new Date()
 date.setHours(0, 0, 0, 0)
@@ -44,6 +50,7 @@ export const formSchema = z.object({
       return !isNaN(number) && number >= 1
     })
     .optional(),
+  shortUrl: z.string().optional(),
 })
 
 export type ResponseDataType =
@@ -63,13 +70,15 @@ type UrlFormProps = {
   ) => void
 }
 
-const defaultValues = {
+const defaultValues: z.infer<typeof formSchema> = {
   url: '',
   expires: undefined,
   maxAmount: '',
+  shortUrl: '',
 }
 
 const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null)
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: initialValue ?? defaultValues,
@@ -78,13 +87,55 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
   useEffect(() => {
     if (!initialValue) return
 
+    form.reset()
+
     form.setValue('url', initialValue.url)
     form.setValue('expires', initialValue.expires)
     form.setValue('maxAmount', initialValue.maxAmount)
+    form.setValue('shortUrl', initialValue.shortUrl)
   }, [initialValue, form])
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit(values, form)
+  }
+
+  const isShortUrlTaken = async (short: string) => {
+    if (short.length === 0 || short === initialValue?.shortUrl) {
+      form.clearErrors('shortUrl')
+      return
+    }
+
+    form.trigger('shortUrl')
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/url/${short}`,
+        { cache: 'no-store' },
+      )
+
+      if (res.status === 200) {
+        console.log(await res.json(), short)
+        form.setError('shortUrl', {
+          message: `${short} is alredy taken as a short path.`,
+        })
+      } else {
+        form.clearErrors('shortUrl')
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error('Error validating that your short url is uniqe')
+      }
+    }
+  }
+
+  const handleShortUrlChange = (ev: ChangeEvent<HTMLInputElement>) => {
+    if (timer) clearTimeout(timer)
+
+    const { value } = ev.target
+    const shortPath = value.trim().replace(' ', '-')
+    form.setValue('shortUrl', shortPath)
+
+    setTimer(setTimeout(() => isShortUrlTaken(shortPath), 300))
   }
 
   return (
@@ -107,6 +158,35 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
                   tabIndex={1}
                   {...field}
                   placeholder='https://www.google.com'
+                />
+              </FormControl>
+              <FormMessage className='text-start' />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='shortUrl'
+          render={({ field: { onChange, ...rest } }) => (
+            <FormItem className='sm:col-span-2'>
+              <FormLabel className='flex w-full flex-grow items-center justify-between'>
+                Custom short url (optional)
+                <HoverCard>
+                  <HoverCardTrigger className='cursor-pointer'>
+                    <Info size={16} />
+                  </HoverCardTrigger>
+                  <HoverCardContent>
+                    This field can be left empty and we will generate a path for
+                    you
+                  </HoverCardContent>
+                </HoverCard>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  tabIndex={2}
+                  {...rest}
+                  onChange={handleShortUrlChange}
+                  placeholder='minify'
                 />
               </FormControl>
               <FormMessage className='text-start' />
@@ -186,7 +266,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
               <FormControl>
                 <Input
                   {...field}
-                  tabIndex={3}
+                  tabIndex={4}
                   placeholder='500'
                   type='number'
                   min={1}

@@ -112,7 +112,10 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(req: NextRequest): Promise<NextResponse> {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { slug: string } },
+): Promise<NextResponse> {
   const client = createClient()
   try {
     await client.connect()
@@ -122,8 +125,6 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
     if (body.expires_at) {
       body.expires_at = new Date(body.expires_at)
     }
-
-    console.log(updateUrlSchema.safeParse(body).error)
 
     if (!updateUrlSchema.safeParse(body).success) {
       return NextResponse.json<ApiResponse<null>>(
@@ -141,7 +142,7 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
       expires_at = ${expires_at?.toISOString()},
       max_views =  ${max_views},
       short_url = ${short_url}
-      WHERE short_url = ${short_url} RETURNING *;
+      WHERE short_url = ${params.slug} RETURNING *;
     `
 
     const updateResult = updateQuery.rows[0] as DBUrlRow
