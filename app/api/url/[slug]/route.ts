@@ -16,6 +16,8 @@ export async function GET(
       SELECT  original_url, views, max_views, expires_at, user_id
       FROM urls WHERE short_url = ${slug};
     `
+    console.log('Query:', query)
+    console.log('Query rows:', query.rows)
 
     if (!query.rows.length) {
       console.log('URL not found')
