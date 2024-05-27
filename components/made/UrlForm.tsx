@@ -17,7 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from '../ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { cn } from '@/lib/utils'
-import { CalendarIcon, Info } from 'lucide-react'
+import { CalendarIcon, Info, X } from 'lucide-react'
 import { Calendar } from '../ui/calendar'
 import { format } from 'date-fns'
 import { HoverCard } from '@radix-ui/react-hover-card'
@@ -160,7 +160,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='url'
           render={({ field }) => (
-            <FormItem className='sm:col-span-2'>
+            <FormItem className='col-span-2'>
               <FormLabel className='flex w-full justify-start'>
                 Original url
               </FormLabel>
@@ -180,7 +180,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='shortUrl'
           render={({ field: { onChange, ...rest } }) => (
-            <FormItem className='sm:cols-span-1 col-span-2'>
+            <FormItem className='col-span-2'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Custom short url (optional)
                 <HoverCard>
@@ -209,7 +209,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='expires'
           render={({ field }) => (
-            <FormItem className='sm:cols-span-1 col-span-2 flex flex-col'>
+            <FormItem className='col-span-2 flex flex-col sm:col-span-1'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Expires (optional)
                 <HoverCard>
@@ -264,7 +264,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
                     onClick={clearDate}
                     className='ml-2'
                   >
-                    Clear Date
+                    <X size={16} />
                   </Button>
                 )}
               </div>
@@ -276,7 +276,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='maxAmount'
           render={({ field }) => (
-            <FormItem className='sm:cols-span-1 col-span-2'>
+            <FormItem className='col-span-2 sm:col-span-1'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Max views (optional)
                 <HoverCard>
@@ -303,7 +303,11 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           )}
         />
 
-        <div className='col-span-2 grid gap-4 sm:grid-cols-2'>
+        <div
+          className={cn('col-span-2 grid gap-4', {
+            'grid-cols-2': initialValue,
+          })}
+        >
           <Button type='submit' disabled={!form.formState.isValid}>
             {!initialValue ? 'Create' : 'Save'}
           </Button>
