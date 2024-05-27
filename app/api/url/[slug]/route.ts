@@ -14,12 +14,18 @@ export async function GET(
     console.log(slug, 'requested')
     const testQuery = await sql`SELECT * FROM urls;`
     console.log('Test query:', testQuery)
-    const query = await sql`
-      SELECT  original_url, views, max_views, expires_at, user_id
-      FROM urls WHERE short_url = ${slug};
-    `
+    const querytester = await client.query(
+      'SELECT original_url, views, max_views, expires_at, user_id FROM urls WHERE short_url = $1',
+      ['broke'],
+    )
+
+    console.log('Query tester:', querytester.rows)
+    const query = await client.query(
+      'SELECT original_url, views, max_views, expires_at, user_id FROM urls WHERE short_url = $1',
+      [slug],
+    )
+    console.log('Query result:', query.rows)
     console.log('Query:', query)
-    console.log('Query rows:', query.rows)
 
     if (!query.rows.length) {
       console.log('URL not found')
