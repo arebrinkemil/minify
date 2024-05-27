@@ -209,7 +209,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='expires'
           render={({ field }) => (
-            <FormItem className='flex flex-col'>
+            <FormItem className='md:cols-span-1 col-span-2 flex flex-col'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Expires (optional)
                 <HoverCard>
@@ -276,7 +276,7 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
           control={form.control}
           name='maxAmount'
           render={({ field }) => (
-            <FormItem>
+            <FormItem className='md:cols-span-1 col-span-2'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Max views (optional)
                 <HoverCard>
