@@ -32,7 +32,7 @@ export async function GET(
           success: false,
           error: new Error('URL has reached maximun amount of visists.'),
         },
-        { status: 403 },
+        { status: 404 },
       )
     }
 
@@ -44,7 +44,7 @@ export async function GET(
           success: false,
           error: new Error('Times up!'),
         },
-        { status: 403 },
+        { status: 404 },
       )
     }
 
