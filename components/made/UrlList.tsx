@@ -12,7 +12,7 @@ import { Input } from '../ui/input'
 import { Card, CardContent, CardHeader } from '../ui/card'
 import { Button } from '../ui/button'
 import useWindowSize from '@/hooks/useWindowSize'
-import { Menu, X } from 'lucide-react'
+import { Menu, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import UrlForm, { ResponseDataType, formSchema } from './UrlForm'
 import ClipbordCopy from './ClipbordCopy'
@@ -20,7 +20,22 @@ import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
-import { updateUrlSchema } from '@/app/api/user/url/[slug]/schema'
+import {
+  deleteUrlSchema,
+  updateUrlSchema,
+} from '@/app/api/user/url/[slug]/schema'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog'
+import { ApiResponse, DBUrlRow } from '@/types/types'
 
 type UrlListProps = {
   urls: UrlType[]
@@ -155,6 +170,49 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
     })
   }
 
+  const handleDelete = (url: UrlType) => {
+    const deletePromise = new Promise(async (resolve, reject) => {
+      try {
+        const reqBody: z.infer<typeof deleteUrlSchema> = {
+          user_id: session.data?.user.id || '',
+        }
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/url/${url.short_url}`,
+          {
+            method: 'DELETE',
+            body: JSON.stringify(reqBody),
+            cache: 'no-store',
+          },
+        )
+        const body: ApiResponse<DBUrlRow> = await res.json()
+
+        if (!body.success) {
+          reject(body.error)
+          return
+        }
+
+        const filterList = initUrls.filter(u => u.short_url !== url.short_url)
+        setInitUrls(filterList)
+        setUrlList(filterList)
+
+        resolve(body.data)
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          reject(error)
+        }
+
+        reject(new Error('Failed to delete url'))
+      }
+    })
+
+    toast.promise(deletePromise, {
+      loading: 'Deleting url',
+      success: 'Url deleted successfully',
+      error: (error: Error) => error.message,
+    })
+  }
+
   return (
     <section className='flex h-full flex-col gap-4 lg:flex-row'>
       <Card
@@ -184,16 +242,44 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
           <div>
             {urlList.map(url => (
               <Button
+                asChild
                 key={url.full_short}
                 variant={'ghost'}
-                className={cn('w-full justify-start', {
+                className={cn('flex w-full justify-between gap-2', {
                   'bg-accent': url.short_url === selectedUrl?.short_url,
                 })}
                 onClick={() => selectUrl(url)}
               >
-                <p className='w-full overflow-hidden text-ellipsis text-start'>
-                  {prettierUrl(url.original_url)}
-                </p>
+                <div className='cursor-pointer select-none'>
+                  <p className='w-full overflow-hidden text-ellipsis text-start'>
+                    {prettierUrl(url.original_url)}
+                  </p>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant={'destructive'} className='h-fit p-1.5'>
+                        <Trash2 size={14} />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete your account and remove your data from our
+                          database.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(url)}>
+                          <Trash2 size={20} />
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </Button>
             ))}
           </div>

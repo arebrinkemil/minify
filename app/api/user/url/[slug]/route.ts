@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, sql } from '@vercel/postgres'
 import { z } from 'zod'
-import { DBUrlRow } from '@/types/types'
-import { updateUrlSchema } from './schema'
-
-type ApiResponse<T> =
-  | {
-      success: true
-      data: T
-    }
-  | {
-      success: false
-      error: Error
-    }
+import { ApiResponse, DBUrlRow } from '@/types/types'
+import { deleteUrlSchema, updateUrlSchema } from './schema'
 
 export async function GET(
   req: NextRequest,
@@ -66,14 +56,13 @@ export async function DELETE(
   const client = createClient()
 
   try {
-    const body = await req.json()
-    const userId = body.user_id
+    const { user_id } = (await req.json()) as z.infer<typeof deleteUrlSchema>
     const shortUrl = params.slug
 
-    if (!userId) {
+    if (!deleteUrlSchema.safeParse({ user_id }).success) {
       return NextResponse.json<ApiResponse<null>>(
         { success: false, error: new Error('User ID is required') },
-        { status: 400 },
+        { status: 403 },
       )
     }
 
@@ -81,7 +70,7 @@ export async function DELETE(
 
     const query =
       'DELETE FROM urls WHERE user_id = $1 AND short_url = $2 RETURNING *;'
-    const values = [userId, shortUrl]
+    const values = [user_id, shortUrl]
 
     const result = await client.query(query, values)
 
@@ -92,10 +81,15 @@ export async function DELETE(
       )
     }
 
-    return NextResponse.json<ApiResponse<DBUrlRow>>({
-      success: true,
-      data: result.rows[0],
-    })
+    return NextResponse.json<ApiResponse<DBUrlRow>>(
+      {
+        success: true,
+        data: result.rows[0],
+      },
+      {
+        status: 200,
+      },
+    )
   } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json<ApiResponse<null>>(
