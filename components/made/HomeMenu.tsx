@@ -5,8 +5,9 @@ import UrlForm, { ResponseDataType, formSchema } from './UrlForm'
 import ClipbordCopy from './ClipbordCopy'
 import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
-import { z } from 'zod'
+import { TypeOf, z } from 'zod'
 import { UseFormReturn } from 'react-hook-form'
+import { updateUrlSchema } from '@/app/api/url/schema'
 
 const HomeMenu = () => {
   const [url, setUrl] = useState('')
@@ -20,18 +21,20 @@ const HomeMenu = () => {
       try {
         const { url, expires, maxAmount, shortUrl } = values
 
+        const body: z.infer<typeof updateUrlSchema> = {
+          original_url: url,
+          expires_at: expires,
+          max_views: maxAmount ? parseInt(maxAmount) : undefined,
+          user_id: session.data?.user.id,
+          short_url: shortUrl,
+        }
+
         const req: RequestInit = {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            original_url: url,
-            expires_at: expires || null,
-            max_views: maxAmount ? parseInt(maxAmount) : null,
-            user_id: session.data?.user.id || null,
-            short_url: shortUrl,
-          }),
+          body: JSON.stringify(body),
         }
 
         const res = await fetch(

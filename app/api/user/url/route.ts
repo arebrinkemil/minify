@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@vercel/postgres'
 import { generateShortUrl } from '@/lib/urlUtils'
 import { getToken } from 'next-auth/jwt'
+import { updateUserURlSchema } from './schema'
+import { z } from 'zod'
 
 export async function POST(req: NextRequest) {
   const client = createClient()
@@ -11,7 +13,16 @@ export async function POST(req: NextRequest) {
 
     const short_url = generateShortUrl()
 
-    const { original_url, expires_at, user_id } = await req.json()
+    const body = (await req.json()) as z.infer<typeof updateUserURlSchema>
+
+    if (!updateUserURlSchema.safeParse(body).success) {
+      return NextResponse.json(
+        { success: false, error: new Error('Invalid data') },
+        { status: 403 },
+      )
+    }
+
+    const { original_url, expires_at, user_id } = body
 
     const query = `
       INSERT INTO urls (original_url, short_url, expires_at, user_id)
@@ -46,7 +57,7 @@ export async function GET(req: NextRequest) {
     const userId = token?.sub
 
     if (!userId) {
-      console.log("failed !userId")
+      console.log('failed !userId')
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 },
@@ -65,7 +76,7 @@ export async function GET(req: NextRequest) {
     const result = await client.query(query, values)
 
     if (result.rows.length === 0) {
-      console.log("Failed result.rows.length === 0")
+      console.log('Failed result.rows.length === 0')
       return NextResponse.json(
         { success: false, error: 'No URLs found for this user' },
         { status: 404 },
@@ -81,8 +92,8 @@ export async function GET(req: NextRequest) {
       errorMessage = error.message
     }
 
-    console.log("failed catch")
-    
+    console.log('failed catch')
+
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 },
