@@ -13,7 +13,7 @@ export async function GET(
     await client.connect()
 
     const query = await sql`
-      SELECT  original_url, views, max_views, expires_at
+      SELECT  original_url, views, max_views, expires_at, user_id
       FROM urls WHERE short_url = ${slug};
     `
 
@@ -24,7 +24,8 @@ export async function GET(
       )
     }
 
-    const { original_url, views, max_views, expires_at } = query.rows[0] as DBUrlRow
+    const { original_url, views, max_views, expires_at, user_id } = query
+      .rows[0] as DBUrlRow
 
     if (max_views && views >= max_views) {
       return NextResponse.json(
@@ -36,9 +37,13 @@ export async function GET(
       )
     }
 
-    const currentDate = new Date();
+    if (expires_at && new Date(expires_at) < new Date()) {
+      if (!user_id) {
+        await sql`
+          DELETE FROM urls WHERE short_url = ${slug}
+        `
+      }
 
-    if (new Date(expires_at) < currentDate) {
       return NextResponse.json(
         {
           success: false,
