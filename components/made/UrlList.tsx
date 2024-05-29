@@ -216,7 +216,7 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
   }
 
   return (
-    <section className='flex h-full flex-col gap-4 lg:flex-row'>
+    <section className='flex flex-grow flex-col gap-4 lg:flex-row'>
       <Card
         className={cn(
           'absolute right-full z-20 h-[calc(100vh-79px-32px)] w-[calc(100vw-48px)] max-w-[400px] transition-all duration-300 lg:static',
